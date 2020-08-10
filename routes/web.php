@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/contact','Contact@display');
+Route::post('/contact','Contact@display_result')->name('result');

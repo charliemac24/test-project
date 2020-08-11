@@ -80,22 +80,41 @@ class Contact extends Controller
 	    	foreach($col_vals_array as $item_array){	    		
 	    		foreach($item_array as $csv_col=>$csv_val){
 	    			// subject templates
-	    			if(!empty($subjects)){	    				
-		    			foreach($subjects as $subj_key=>$subj_val){		    				
-		    				if(strpos($subj_val,'{{ '.$csv_col.' }}' )>-1 || strpos($subj_val,'{{'.$csv_col.'}}' )>-1){
+	    			if(!empty($subjects)){
+
+		    			foreach($subjects as $subj_key=>$subj_val){	
+
+		    				if(
+		    					strpos($subj_val,'{{ '.$csv_col.' }}' )>-1 || 
+		    					strpos($subj_val,'{{'.$csv_col.'}}' )>-1){
+
+		    					// if value isn't empty, replace
 		    					if(!empty($csv_val)){
 		    						$subjects_array[] = str_replace(
-		    							array('{{ '.$csv_col.' }}','{{'.$csv_col.'}}'), $csv_val, $subj_val);
+		    							array(
+		    								'{{ '.$csv_col.' }}',
+		    								'{{'.$csv_col.'}}'
+		    							), $csv_val, $subj_val
+		    						);
 		    						
-		    					}
-		    					if(empty($csv_val)){
+		    					}else{
+
+		    						// if empty, try to loop on the rest of the template
 		    						$sub_subjects_array = array();
 		    						for($i=1;$i<count($subjects);$i++){
 		    							preg_match_all('/{{(.*?)}}/', $subjects[$i], $matches);
 		    							$find_key = str_replace(array('{{ ',' }}','{{','}}'),'',$matches[0]);
 		    							if(isset($find_key[0])){
 		    								if(array_key_exists($find_key[0], $item_array)){
-			    								$sub_subjects_array[] = !empty($item_array[$find_key[0]]) ? str_replace(array('{{ '.$find_key[0].' }}','{{'.$find_key[0].'}}'), $item_array[$find_key[0]], $subjects[$i]) : "";
+			    								$sub_subjects_array[] = !empty($item_array[$find_key[0]]) ? 
+			    									str_replace(
+			    										array(
+			    											'{{ '.$find_key[0].' }}',
+			    											'{{'.$find_key[0].'}}'
+			    										), 
+			    										$item_array[$find_key[0]], 
+			    										$subjects[$i]
+			    									) : "";
 			    								
 				    						}else{
 				    							$sub_subjects_array[] = "";	
@@ -129,20 +148,37 @@ class Contact extends Controller
 		    		// message templates
 	    			if(!empty($messages)){	    				
 		    			foreach($messages as $msg_key=>$msg_val){		    				
-		    				if(strpos($msg_val,'{{ '.$csv_col.' }}' )>-1 || strpos($msg_val,'{{'.$csv_col.'}}' )>-1){
+		    				if(
+		    					strpos($msg_val,'{{ '.$csv_col.' }}' )>-1 || 
+		    					strpos($msg_val,'{{'.$csv_col.'}}' )>-1){
+
+		    					// if value isn't empty, replace
 		    					if(!empty($csv_val)){
 		    						$messages_array[] = str_replace(
-		    							array('{{ '.$csv_col.' }}','{{'.$csv_col.'}}'), $csv_val, $msg_val);
+		    							array(
+		    								'{{ '.$csv_col.' }}',
+		    								'{{'.$csv_col.'}}'), 
+		    							$csv_val, $msg_val
+		    						);
 		    						
-		    					}
-		    					if(empty($csv_val)){
+		    					}else{
+
+		    						// if empty, try to loop on the rest of the template
 		    						$sub_messages_array = array();
 		    						for($i=1;$i<count($messages);$i++){
 		    							preg_match_all('/{{(.*?)}}/', $messages[$i], $matches);
 		    							$find_key = str_replace(array('{{ ',' }}','{{','}}'),'',$matches[0]);
 		    							if(isset($find_key[0])){
 		    								if(array_key_exists($find_key[0], $item_array)){
-			    								$sub_messages_array[] = !empty($item_array[$find_key[0]]) ? str_replace(array('{{ '.$find_key[0].' }}','{{'.$find_key[0].'}}'), $item_array[$find_key[0]], $messages[$i]) : "";
+			    								$sub_messages_array[] = !empty($item_array[$find_key[0]]) ? 
+			    									str_replace(
+			    										array(
+			    											'{{ '.$find_key[0].' }}',
+			    											'{{'.$find_key[0].'}}'
+			    										), 
+			    										$item_array[$find_key[0]], 
+			    										$messages[$i]
+			    									) : "";
 			    								
 				    						}else{
 				    							$sub_messages_array[] = "";	

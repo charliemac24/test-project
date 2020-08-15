@@ -53,7 +53,8 @@ class Contact extends Controller
 
 	    	// arrays that will handle the csv data
 	    	$headers_array = array();
-	    	$col_vals_array = array();
+	    	$col_vals_array = array();	    	
+	    	$key_headers_array = array();
 
 	    	// while there is something to read
 	    	while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
@@ -66,152 +67,153 @@ class Contact extends Controller
 	                $idx++;
 	                continue; 
 	            }
-	            // now the value of columns
-	            for($c=0;$c<$num;$c++){
-	            	// make the headers as key
-	            	$col_vals_array[$idx][$headers_array[$c]] = $filedata[$c];
+
+	            if($idx>0){
+
+	            	for($c=0;$c<$num;$c++){
+	            		
+		            	// make the headers as key
+		            	$col_vals_array[$idx][$headers_array[$c]] = $filedata[$c];
+		            	$key_headers_array[] = '{{'.$headers_array[$c].'}}';
+		            }
+
+		            $_search_array = array();
+		            $_replace_array = array();
+		            $_subj = "";
+		            foreach($subjects as $subj_key=>$subj_val){
+
+	            		// loop but just get the last 
+	            		// because they're just similar
+		            	$_pop = end($col_vals_array);
+
+		            	foreach($_pop as $k=>$v){
+
+		            		preg_match_all('/{{(.*?)}}/', $subjects[$subj_key], $matches);
+		            		$find = $matches[0];
+
+		            		if(!empty($v)) {	
+		            			//echo $subj_val."=".$k."=".$v."<br>"; 
+		            			if(strpos($subj_val, '{{'.$k.'}}')>-1){
+		            				$_search_array[] = '{{'.$k.'}}';
+				            		$_replace_array[] = $v;
+				            		$_subj = $subjects[$subj_key];					            		
+		            			}else{
+		            				// loop the rest of the template
+			            			for($x=($subj_key+1);$x<count($subjects);$x++){					            	
+						            	$_pop = end($col_vals_array);
+						            	foreach($_pop as $k=>$v){
+						            		if(!empty($v)){
+						            			if(strpos($subjects[$x], '{{'.$k.'}}')>-1){
+							            			$_search_array[] =  '{{'.$k.'}}';
+					            					$_replace_array[] = $v;
+					            					$_subj = $subjects[$x];
+					            					//echo $_subj."=".$k."=".$v."<br>";
+					            				}
+						            		}					            		
+						            	}
+			            			}
+		            			}	            			          			
+		            				            			
+		            		}else{
+		            			// loop the rest of the template
+		            			for($x=($subj_key+1);$x<count($subjects);$x++){					            	
+					            	$_pop = end($col_vals_array);
+					            	foreach($_pop as $k=>$v){
+					            		if(!empty($v)){
+					            			if(strpos($subjects[$x], '{{'.$k.'}}')>-1){
+						            			$_search_array[] =  '{{'.$k.'}}';
+				            					$_replace_array[] = $v;
+				            					$_subj = $subjects[$x];
+				            					//echo $_subj."=".$k."=".$v."<br>";
+				            				}
+					            		}					            		
+					            	}
+		            			}
+		            		}
+		            	}
+		            	
+		            	//echo $_subj."<br>";
+		            	$subjects_array[] = str_replace(
+				            $_search_array, 
+				            $_replace_array, 
+				            $_subj
+				        );
+			            break;
+		            }
+
+
+		            $_search_array = array();
+		            $_replace_array = array();
+		            $_msg = "";
+		            foreach($messages as $msg_key=>$msg_val){
+
+	            		// loop but just get the last 
+	            		// because they're just similar
+		            	$_pop = end($col_vals_array);
+
+		            	foreach($_pop as $k=>$v){
+
+		            		preg_match_all('/{{(.*?)}}/', $messages[$msg_key], $matches);
+		            		$find = $matches[0];
+
+		            		if(!empty($v)) {	
+		            			//echo $subj_val."=".$k."=".$v."<br>"; 
+		            			if(strpos($msg_val, '{{'.$k.'}}')>-1){
+		            				$_search_array[] = '{{'.$k.'}}';
+				            		$_replace_array[] = $v;
+				            		$_msg = $messages[$msg_key];					            		
+		            			}else{
+		            				// loop the rest of the template
+			            			for($x=($msg_key+1);$x<count($messages);$x++){					            	
+						            	$_pop = end($col_vals_array);
+						            	foreach($_pop as $k=>$v){
+						            		if(!empty($v)){
+						            			if(strpos($messages[$x], '{{'.$k.'}}')>-1){
+							            			$_search_array[] =  '{{'.$k.'}}';
+					            					$_replace_array[] = $v;
+					            					$_msg = $messages[$x];
+					            					//echo $_msg."=".$k."=".$v."<br>";
+					            				}
+						            		}					            		
+						            	}
+			            			}
+		            			}	            			          			
+		            				            			
+		            		}else{
+		            			// loop the rest of the template
+		            			for($x=($msg_key+1);$x<count($messages);$x++){					            	
+					            	$_pop = end($col_vals_array);
+					            	foreach($_pop as $k=>$v){
+					            		if(!empty($v)){
+					            			if(strpos($messages[$x], '{{'.$k.'}}')>-1){
+						            			$_search_array[] =  '{{'.$k.'}}';
+				            					$_replace_array[] = $v;
+				            					$_msg = $messages[$x];
+				            					//echo $_msg."=".$k."=".$v."<br>";
+				            				}
+					            		}					            		
+					            	}
+		            			}
+		            		}
+		            	}
+		            	
+		            	//echo $_subj."<br>";
+		            	$messages_array[] = str_replace(
+				            $_search_array, 
+				            $_replace_array, 
+				            $_msg
+				        );
+			            break;
+		            }
+		            
 	            }
+
 	            $idx++;
 
 	    	}
 	    	fclose($file); // close the file
 
-	    	// now let's do the real thing
-	    	foreach($col_vals_array as $item_array){	    		
-	    		foreach($item_array as $csv_col=>$csv_val){
-	    			// subject templates
-	    			if(!empty($subjects)){
-
-		    			foreach($subjects as $subj_key=>$subj_val){	
-
-		    				if(
-		    					strpos($subj_val,'{{ '.$csv_col.' }}' )>-1 || 
-		    					strpos($subj_val,'{{'.$csv_col.'}}' )>-1){
-
-		    					// if value isn't empty, replace
-		    					if(!empty($csv_val)){
-		    						$subjects_array[] = str_replace(
-		    							array(
-		    								'{{ '.$csv_col.' }}',
-		    								'{{'.$csv_col.'}}'
-		    							), $csv_val, $subj_val
-		    						);
-		    						
-		    					}else{
-
-		    						// if empty, try to loop on the rest of the template
-		    						$sub_subjects_array = array();
-		    						for($i=1;$i<count($subjects);$i++){
-		    							preg_match_all('/{{(.*?)}}/', $subjects[$i], $matches);
-		    							$find_key = str_replace(array('{{ ',' }}','{{','}}'),'',$matches[0]);
-		    							if(isset($find_key[0])){
-		    								if(array_key_exists($find_key[0], $item_array)){
-			    								$sub_subjects_array[] = !empty($item_array[$find_key[0]]) ? 
-			    									str_replace(
-			    										array(
-			    											'{{ '.$find_key[0].' }}',
-			    											'{{'.$find_key[0].'}}'
-			    										), 
-			    										$item_array[$find_key[0]], 
-			    										$subjects[$i]
-			    									) : "";
-			    								
-				    						}else{
-				    							$sub_subjects_array[] = "";	
-				    						}
-		    							}else{
-		    								$sub_subjects_array[] = "";
-		    							}				
-		    									    							
-		    						}
-
-		    						if(!empty($sub_subjects_array)){
-		    							foreach($sub_subjects_array as $k=>$v){
-			    							if(!empty($v)){
-			    								$subjects_array[] = $v;
-			    							}
-			    						}
-			    						if(!array_filter($sub_subjects_array)) {
-			    							$subjects_array[] = "";
-			    						}
-		    						}else{
-		    							$subjects_array[] = "";
-		    						}
-		    						
-		    					}		    					
-		    				}
-		    				break;
-		    			}// END: subject loop
-		    		}// END: subject if
-
-
-		    		// message templates
-	    			if(!empty($messages)){	    				
-		    			foreach($messages as $msg_key=>$msg_val){		    				
-		    				if(
-		    					strpos($msg_val,'{{ '.$csv_col.' }}' )>-1 || 
-		    					strpos($msg_val,'{{'.$csv_col.'}}' )>-1){
-
-		    					// if value isn't empty, replace
-		    					if(!empty($csv_val)){
-		    						$messages_array[] = str_replace(
-		    							array(
-		    								'{{ '.$csv_col.' }}',
-		    								'{{'.$csv_col.'}}'), 
-		    							$csv_val, $msg_val
-		    						);
-		    						
-		    					}else{
-
-		    						// if empty, try to loop on the rest of the template
-		    						$sub_messages_array = array();
-		    						for($i=1;$i<count($messages);$i++){
-		    							preg_match_all('/{{(.*?)}}/', $messages[$i], $matches);
-		    							$find_key = str_replace(array('{{ ',' }}','{{','}}'),'',$matches[0]);
-		    							if(isset($find_key[0])){
-		    								if(array_key_exists($find_key[0], $item_array)){
-			    								$sub_messages_array[] = !empty($item_array[$find_key[0]]) ? 
-			    									str_replace(
-			    										array(
-			    											'{{ '.$find_key[0].' }}',
-			    											'{{'.$find_key[0].'}}'
-			    										), 
-			    										$item_array[$find_key[0]], 
-			    										$messages[$i]
-			    									) : "";
-			    								
-				    						}else{
-				    							$sub_messages_array[] = "";	
-				    						}
-		    							}else{
-		    								$sub_messages_array[] = "";
-		    							}				
-		    									    							
-		    						}
-
-		    						if(!empty($sub_messages_array)){
-		    							foreach($sub_messages_array as $k=>$v){
-			    							if(!empty($v)){
-			    								$messages_array[] = $v;
-			    							}
-			    						}
-			    						if(!array_filter($sub_messages_array)) {
-			    							$messages_array[] = "";
-			    						}
-		    						}else{
-		    							$messages_array[] = "";
-		    						}
-		    						
-		    					}		    					
-		    				}
-		    				break;
-		    			}// END: message loop
-		    		}// END: message if
-	    		}
-	    	}
-
-
-    	} //: END if($file)
+	    }
 
     	// display
     	return view('project', [

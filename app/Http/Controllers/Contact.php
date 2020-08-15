@@ -91,23 +91,23 @@ class Contact extends Controller
 		            		preg_match_all('/{{(.*?)}}/', $subjects[$subj_key], $matches);
 		            		$find = $matches[0];
 
-		            		if(!empty($v)) {	
-		            			//echo $subj_val."=".$k."=".$v."<br>"; 
+		            		if(!empty($v)) {	 
 		            			if(strpos($subj_val, '{{'.$k.'}}')>-1){
 		            				$_search_array[] = '{{'.$k.'}}';
 				            		$_replace_array[] = $v;
-				            		$_subj = $subjects[$subj_key];					            		
+				            		$_subj = $subjects[$subj_key];				            		
 		            			}else{
 		            				// loop the rest of the template
 			            			for($x=($subj_key+1);$x<count($subjects);$x++){					            	
-						            	$_pop = end($col_vals_array);
+						            	$_pop = $col_vals_array;
 						            	foreach($_pop as $k=>$v){
 						            		if(!empty($v)){
 						            			if(strpos($subjects[$x], '{{'.$k.'}}')>-1){
 							            			$_search_array[] =  '{{'.$k.'}}';
 					            					$_replace_array[] = $v;
 					            					$_subj = $subjects[$x];
-					            					//echo $_subj."=".$k."=".$v."<br>";
+					            					
+					            					echo $_subj."=".$k."=".$v."<br>";
 					            				}
 						            		}					            		
 						            	}
@@ -124,7 +124,6 @@ class Contact extends Controller
 						            			$_search_array[] =  '{{'.$k.'}}';
 				            					$_replace_array[] = $v;
 				            					$_subj = $subjects[$x];
-				            					//echo $_subj."=".$k."=".$v."<br>";
 				            				}
 					            		}					            		
 					            	}
@@ -132,7 +131,6 @@ class Contact extends Controller
 		            		}
 		            	}
 		            	
-		            	//echo $_subj."<br>";
 		            	$subjects_array[] = str_replace(
 				            $_search_array, 
 				            $_replace_array, 
@@ -140,7 +138,6 @@ class Contact extends Controller
 				        );
 			            break;
 		            }
-
 
 		            $_search_array = array();
 		            $_replace_array = array();
@@ -157,7 +154,6 @@ class Contact extends Controller
 		            		$find = $matches[0];
 
 		            		if(!empty($v)) {	
-		            			//echo $subj_val."=".$k."=".$v."<br>"; 
 		            			if(strpos($msg_val, '{{'.$k.'}}')>-1){
 		            				$_search_array[] = '{{'.$k.'}}';
 				            		$_replace_array[] = $v;
@@ -165,14 +161,13 @@ class Contact extends Controller
 		            			}else{
 		            				// loop the rest of the template
 			            			for($x=($msg_key+1);$x<count($messages);$x++){					            	
-						            	$_pop = end($col_vals_array);
+						            	$_pop = $col_vals_array;
 						            	foreach($_pop as $k=>$v){
 						            		if(!empty($v)){
 						            			if(strpos($messages[$x], '{{'.$k.'}}')>-1){
 							            			$_search_array[] =  '{{'.$k.'}}';
 					            					$_replace_array[] = $v;
 					            					$_msg = $messages[$x];
-					            					//echo $_msg."=".$k."=".$v."<br>";
 					            				}
 						            		}					            		
 						            	}
@@ -189,7 +184,6 @@ class Contact extends Controller
 						            			$_search_array[] =  '{{'.$k.'}}';
 				            					$_replace_array[] = $v;
 				            					$_msg = $messages[$x];
-				            					//echo $_msg."=".$k."=".$v."<br>";
 				            				}
 					            		}					            		
 					            	}
@@ -197,7 +191,6 @@ class Contact extends Controller
 		            		}
 		            	}
 		            	
-		            	//echo $_subj."<br>";
 		            	$messages_array[] = str_replace(
 				            $_search_array, 
 				            $_replace_array, 
